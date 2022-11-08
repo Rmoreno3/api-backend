@@ -94,6 +94,8 @@ app.use(handleErros)
 
 const PORT = process.env.PORT
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running o port ${PORT}`)
 })
+
+module.exports = { app, server }
