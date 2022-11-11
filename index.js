@@ -4,9 +4,16 @@ require('./mongo')
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const Note = require('./models/Note')
 const notFound = require('./middleware/notFound')
 const handleErros = require('./middleware/handleErrors')
+
+// CONTROLLERS DE RUTAS
+const createNote = require('./controllers/createNote')
+const deleteNote = require('./controllers/deleteNote')
+const updateNote = require('./controllers/updateNote')
+const pullNote = require('./controllers/pullNote')
+const pullsNotes = require('./controllers/pullsNotes')
+const usersRouter = require('./controllers/users')
 
 app.use(cors())
 app.use(express.json())
@@ -15,74 +22,23 @@ app.get('/', (req, response) => {
   response.send('<h1>Hello World</h1>')
 })
 
-app.get('/api/notes', (req, response, next) => {
-  Note.find({})
-    .then(notes => {
-      response.json(notes)
-    }).catch(error => {
-      next(error)
-    })
-})
+// TRAER NOTAS
+app.use('/api/notes', pullsNotes)
 
-app.get('/api/notes/:id', (req, response, next) => {
-  const { id } = req.params
-  Note.findById(id)
-    .then(note => {
-      if (note) {
-        response.json(note)
-      } else {
-        response.status(404).end()
-      }
-    }).catch(error => {
-      next(error)
-    })
-})
+// TRAER NOTA
+app.use('/api/notes/:id', pullNote)
 
-app.put('/api/notes/:id', (req, response, next) => {
-  const { id } = req.params
-  const note = req.body
-  const newNoteInfo = {
-    content: note.content,
-    important: note.important
-  }
+// ACTUALIZAR NOTA
+app.use('/api/notes/:id', updateNote)
 
-  Note.findByIdAndUpdate(id, newNoteInfo, { new: true })
-    .then(result => {
-      response.json(result)
-    }).catch(error => {
-      next(error)
-    })
-})
+// ELIMINAR NOTA
+app.use('/api/notes/:id', deleteNote)
 
-app.delete('/api/notes/:id', (req, response, next) => {
-  const { id } = req.params
-  Note.findByIdAndDelete(id)
-    .then(result => {
-      response.status(204).end()
-    })
-    .catch(error => next(error))
-})
+// CREAR NOTA
+app.use('/api/notes', createNote)
 
-app.post('/api/notes', (req, response, next) => {
-  const note = req.body
-
-  if (!note || !note.content) {
-    return response.status(400).json({
-      error: 'note.content is missing'
-    })
-  }
-
-  const newNote = new Note({
-    content: note.content,
-    important: typeof note.important !== 'undefined' ? note.important : false,
-    date: new Date().toISOString()
-  })
-
-  newNote.save()
-    .then(savedNote => {
-      response.status(201).json(savedNote)
-    }).catch(error => next(error))
-})
+// CREAR USUARIO
+app.use('/api/users', usersRouter)
 
 // MANEJO DE ERROR EN CASO DE NO MATCHEAR CON NINGUN PATH
 
