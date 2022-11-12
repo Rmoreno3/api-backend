@@ -4,15 +4,13 @@ require('./mongo')
 const express = require('express')
 const app = express()
 const cors = require('cors')
+
+// MIDDLEWARE MANEJO DE ERRORES
 const notFound = require('./middleware/notFound')
 const handleErros = require('./middleware/handleErrors')
 
 // CONTROLLERS DE RUTAS
-const createNote = require('./controllers/createNote')
-const deleteNote = require('./controllers/deleteNote')
-const updateNote = require('./controllers/updateNote')
-const pullNote = require('./controllers/pullNote')
-const pullsNotes = require('./controllers/pullsNotes')
+const notesRouter = require('./controllers/notes')
 const usersRouter = require('./controllers/users')
 
 app.use(cors())
@@ -22,22 +20,10 @@ app.get('/', (req, response) => {
   response.send('<h1>Hello World</h1>')
 })
 
-// TRAER NOTAS
-app.use('/api/notes', pullsNotes)
+// CRUD DE NOTAS
+app.use('/api/notes', notesRouter)
 
-// TRAER NOTA
-app.use('/api/notes/:id', pullNote)
-
-// ACTUALIZAR NOTA
-app.use('/api/notes/:id', updateNote)
-
-// ELIMINAR NOTA
-app.use('/api/notes/:id', deleteNote)
-
-// CREAR NOTA
-app.use('/api/notes', createNote)
-
-// CREAR USUARIO
+// CRUD DE USUARIO
 app.use('/api/users', usersRouter)
 
 // MANEJO DE ERROR EN CASO DE NO MATCHEAR CON NINGUN PATH
