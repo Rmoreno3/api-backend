@@ -1,6 +1,14 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User')
 
+const getUsers = async (req, res) => {
+  const users = await User.find({}).populate('note', {
+    content: 1,
+    date: 1
+  })
+  res.json(users)
+}
+
 const createUser = async (req, res) => {
   const { body } = req
   const { username, name, password } = body
@@ -18,4 +26,4 @@ const createUser = async (req, res) => {
   res.json(savedUser)
 }
 
-module.exports = createUser
+module.exports = { createUser, getUsers }

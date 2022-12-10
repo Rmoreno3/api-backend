@@ -1,7 +1,8 @@
 const Note = require('../models/Note')
+const User = require('../models/User')
 
 const getNotes = (req, response, next) => {
-  Note.find({})
+  Note.find({}).populate('user', { username: 1, name: 1 })
     .then(notes => {
       response.json(notes)
     }).catch(error => {
@@ -23,25 +24,37 @@ const getNote = (req, response, next) => {
     })
 }
 
-const createNote = (req, response, next) => {
-  const note = req.body
+const createNote = async (req, response, next) => {
+  const { content, important = false, userId } = req.body
 
-  if (!note || !note.content) {
+  const user = await User.findById(userId)
+
+  if (!content) {
     return response.status(400).json({
       error: 'note.content is missing'
     })
   }
 
   const newNote = new Note({
-    content: note.content,
-    important: typeof note.important !== 'undefined' ? note.important : false,
-    date: new Date().toISOString()
+    content,
+    important,
+    date: new Date().toISOString(),
+    user: user._id
   })
 
-  newNote.save()
-    .then(savedNote => {
-      response.status(201).json(savedNote)
-    }).catch(error => next(error))
+  try {
+    const savedNote = await newNote.save()
+    user.note = user.note.concat(savedNote._id)
+    await user.save()
+    response.json(savedNote)
+  } catch (error) {
+    next(error)
+  }
+
+  // newNote.save()
+  //   .then(savedNote => {
+  //     response.status(201).json(savedNote)
+  //   }).catch(error => next(error))
 }
 
 const updateNote = (req, response, next) => {
