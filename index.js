@@ -12,6 +12,7 @@ const handleErros = require('./middleware/handleErrors')
 // CONTROLLERS DE RUTAS
 const notesRouter = require('./controllers/notes')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
 app.use(cors())
 app.use(express.json())
@@ -25,6 +26,9 @@ app.use('/api/notes', notesRouter)
 
 // CRUD DE USUARIO
 app.use('/api/users', usersRouter)
+
+// LOGIN USERS
+app.use('/api/login', loginRouter)
 
 // MANEJO DE ERROR EN CASO DE NO MATCHEAR CON NINGUN PATH
 
